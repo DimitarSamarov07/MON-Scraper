@@ -8,7 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 import xpathlist as xpath
 
-runHeadless = False;
+runHeadless = True;
 
 
 def init_driver():
