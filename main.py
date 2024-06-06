@@ -1,7 +1,11 @@
+from time import sleep
+
 from selenium import webdriver
 from selenium.webdriver import ActionChains
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+
 import xpathlist as xpath
 
 runHeadless = False;
@@ -24,26 +28,32 @@ def sign_in(driver: webdriver.Chrome, username, password):
 
     sign_in_btn = driver.find_element(By.XPATH, xpath.SIGN_IN_BTN)
 
-    ActionChains(driver).move_to_element(sign_in_btn).perform()
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
 
-    driver.implicitly_wait(200)
+    sign_in_btn.click()
+
+    return sign_in_btn
 
 
-def navigate_to_exams(driver: webdriver.Chrome):
-    driver.get("https://infopriem.mon.bg/student/exams")
+def navigate_to_exams(driver: webdriver.Chrome, element_disappeared):
+    WebDriverWait(driver, 20).until(EC.invisibility_of_element_located(element_disappeared))
+    driver.get("https://infopriem.mon.bg/student/marks")
     table = driver.find_element(By.XPATH, xpath.EXAMS_TABLE)
 
     tr_elements = table.find_elements(By.CSS_SELECTOR, "tbody > tr")
 
+    exams = {}
+    counter = 0
+
     for element in tr_elements:
         td_elements = element.find_elements(By.TAG_NAME, "td")
-        for td_el in td_elements:
-            print(td_el)
+        exams[td_elements[0].get_attribute("innerHTML")] = td_elements[2].get_attribute("innerHTML")
+        counter += 1
 
+    print(exams)
     driver.quit()
 
 
 driver_el = init_driver()
-sign_in(driver_el, "test", "test")
-navigate_to_exams(driver_el)
-
+disappear = sign_in(driver_el, "test", "test")
+navigate_to_exams(driver_el, disappear)
