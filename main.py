@@ -1,16 +1,21 @@
+import os
 from time import sleep, time
 
+from dotenv import load_dotenv
 from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 import xpathlist as xpath
 
-RUN_HEADLESS = False
+RUN_HEADLESS = True
 LOGIN_REFRESH_IN_MINUTES = 55
 PAGE_REFRESH_IN_SECONDS = 5
+
+# It is recommended that you use a .env file and let dotenv do the work.
+USERNAME = ""
+PASSWORD = ""
 
 start_time = 0
 last_result = None
@@ -89,5 +94,15 @@ def execute_alert(driver: webdriver.Chrome):
     return 0
 
 
+def import_from_env():
+    global USERNAME, PASSWORD
+
+    load_dotenv()
+
+    USERNAME = os.getenv("USERNAME")
+    PASSWORD = os.getenv("PASSWORD")
+
+
+import_from_env()
 driver_el = init_driver()
-scheduler(driver_el, "sth", "sth")
+scheduler(driver_el, USERNAME, PASSWORD)
