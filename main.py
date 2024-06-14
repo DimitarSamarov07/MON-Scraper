@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, time
 
 from selenium import webdriver
 from selenium.webdriver import ActionChains
@@ -8,12 +8,17 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 import xpathlist as xpath
 
-runHeadless = True;
+RUN_HEADLESS = False
+LOGIN_REFRESH_IN_MINUTES = 55
+PAGE_REFRESH_IN_SECONDS = 5
+
+start_time = 0
+last_result = None
 
 
 def init_driver():
     options = webdriver.ChromeOptions()
-    if runHeadless:
+    if RUN_HEADLESS:
         options.add_argument('--headless')
 
     driver = webdriver.Chrome(options)
@@ -26,17 +31,19 @@ def sign_in(driver: webdriver.Chrome, username, password):
     driver.find_element(By.XPATH, xpath.USERNAME_INPUT).send_keys(username)
     driver.find_element(By.XPATH, xpath.PASSWORD_INPUT).send_keys(password)
 
+    sleep(1)
     sign_in_btn = driver.find_element(By.XPATH, xpath.SIGN_IN_BTN)
 
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-
     sign_in_btn.click()
+    WebDriverWait(driver, 20).until(EC.invisibility_of_element_located(sign_in_btn))
 
-    return sign_in_btn
+
+def log_out(driver: webdriver.Chrome):
+    driver.get("https://infopriem.mon.bg/logout")
 
 
-def navigate_to_exams(driver: webdriver.Chrome, element_disappeared):
-    WebDriverWait(driver, 20).until(EC.invisibility_of_element_located(element_disappeared))
+def navigate_to_exams(driver: webdriver.Chrome):
     driver.get("https://infopriem.mon.bg/student/marks")
     table = driver.find_element(By.XPATH, xpath.EXAMS_TABLE)
 
@@ -50,10 +57,37 @@ def navigate_to_exams(driver: webdriver.Chrome, element_disappeared):
         exams[td_elements[0].get_attribute("innerHTML")] = td_elements[2].get_attribute("innerHTML")
         counter += 1
 
-    print(exams)
-    driver.quit()
+    return exams
+
+
+def do_check(driver: webdriver.Chrome, username, password):
+    global start_time
+    global last_result
+
+    if time() >= start_time + (LOGIN_REFRESH_IN_MINUTES * 60):
+        log_out(driver)
+        sign_in(driver, username, password)
+        start_time = time()
+
+    result = navigate_to_exams(driver)
+    print(result)
+    if last_result is None:
+        last_result = result
+    elif result != last_result:
+        execute_alert(driver)
+        last_result = result
+
+
+def scheduler(driver: webdriver.Chrome, username, password):
+    while True:
+        do_check(driver, username, password)
+        sleep(PAGE_REFRESH_IN_SECONDS)
+
+
+def execute_alert(driver: webdriver.Chrome):
+    # TODO: Implement email notification
+    return 0
 
 
 driver_el = init_driver()
-disappear = sign_in(driver_el, "test", "test")
-navigate_to_exams(driver_el, disappear)
+scheduler(driver_el, "sth", "sth")
