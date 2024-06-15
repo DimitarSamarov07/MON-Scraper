@@ -22,7 +22,7 @@ def import_from_env():
     SUBJECT = os.getenv("SUBJECT")
     SENDER = os.getenv("SENDER")
     RECIPIENT = os.getenv("RECIPIENT")
-    PASSWORD = os.getenv("PASSWORD")
+    PASSWORD = os.getenv("PASSWORD_EMAIL")
 
 
 def generate_alert_mail(new_data, old_data, screenshot):
