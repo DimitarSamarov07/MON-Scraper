@@ -10,7 +10,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 import xpathlist as xpath
 from mail import do_alert_mail
 
-RUN_HEADLESS = False
+RUN_HEADLESS = True
 LOGIN_REFRESH_IN_MINUTES = 55
 PAGE_REFRESH_IN_SECONDS = 50
 
@@ -71,6 +71,7 @@ def do_check(driver: webdriver.Chrome, username, password):
     global last_result
 
     if time() >= start_time + (LOGIN_REFRESH_IN_MINUTES * 60):
+        print("Re-login initiated")
         log_out(driver)
         sign_in(driver, username, password)
         start_time = time()
