@@ -8,10 +8,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 import xpathlist as xpath
+from mail import do_alert_mail
 
-RUN_HEADLESS = True
+RUN_HEADLESS = False
 LOGIN_REFRESH_IN_MINUTES = 55
-PAGE_REFRESH_IN_SECONDS = 5
+PAGE_REFRESH_IN_SECONDS = 50
 
 # It is recommended that you use a .env file and let dotenv do the work.
 USERNAME = ""
@@ -62,7 +63,7 @@ def navigate_to_exams(driver: webdriver.Chrome):
         exams[td_elements[0].get_attribute("innerHTML")] = td_elements[2].get_attribute("innerHTML")
         counter += 1
 
-    return exams
+    return exams, table
 
 
 def do_check(driver: webdriver.Chrome, username, password):
@@ -74,12 +75,12 @@ def do_check(driver: webdriver.Chrome, username, password):
         sign_in(driver, username, password)
         start_time = time()
 
-    result = navigate_to_exams(driver)
+    result, table = navigate_to_exams(driver)
     print(result)
     if last_result is None:
         last_result = result
     elif result != last_result:
-        execute_alert(driver)
+        execute_alert(driver, result, table)
         last_result = result
 
 
@@ -89,9 +90,13 @@ def scheduler(driver: webdriver.Chrome, username, password):
         sleep(PAGE_REFRESH_IN_SECONDS)
 
 
-def execute_alert(driver: webdriver.Chrome):
-    # TODO: Implement email notification
-    return 0
+def execute_alert(driver: webdriver.Chrome, new_result, table_el):
+    global last_result
+    print("Alert fired!")
+
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+    binary_screenshot = table_el.screenshot_as_png
+    do_alert_mail(new_result, last_result, binary_screenshot)
 
 
 def import_from_env():
@@ -100,7 +105,7 @@ def import_from_env():
     load_dotenv()
 
     USERNAME = os.getenv("USERNAME")
-    PASSWORD = os.getenv("PASSWORD")
+    PASSWORD = os.getenv("PASSWORD_USER")
 
 
 import_from_env()
