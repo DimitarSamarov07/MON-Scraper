@@ -42,7 +42,7 @@ def sign_in(driver: webdriver.Chrome, username, password):
 
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
     sign_in_btn.click()
-    WebDriverWait(driver, 20).until(EC.invisibility_of_element_located(sign_in_btn))
+    WebDriverWait(driver, 40).until(EC.invisibility_of_element_located(sign_in_btn))
 
 
 def log_out(driver: webdriver.Chrome):
