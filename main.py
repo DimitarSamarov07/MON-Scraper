@@ -12,7 +12,7 @@ from mail import do_alert_mail
 
 RUN_HEADLESS = True
 LOGIN_REFRESH_IN_MINUTES = 55
-PAGE_REFRESH_IN_SECONDS = 50
+PAGE_REFRESH_IN_SECONDS = 5
 
 # It is recommended that you use a .env file and let dotenv do the work.
 USERNAME = ""
@@ -66,11 +66,11 @@ def navigate_to_exams(driver: webdriver.Chrome):
     return exams, table
 
 
-def do_check(driver: webdriver.Chrome, username, password):
+def do_check(driver: webdriver.Chrome, username, password, re_login):
     global start_time
     global last_result
 
-    if time() >= start_time + (LOGIN_REFRESH_IN_MINUTES * 60):
+    if time() >= start_time + (LOGIN_REFRESH_IN_MINUTES * 60) or re_login:
         print("Re-login initiated")
         log_out(driver)
         sign_in(driver, username, password)
@@ -86,8 +86,22 @@ def do_check(driver: webdriver.Chrome, username, password):
 
 
 def scheduler(driver: webdriver.Chrome, username, password):
+    shall_reset = False
     while True:
-        do_check(driver, username, password)
+        try:
+            if shall_reset:
+                driver.quit()
+                driver = init_driver()
+                do_check(driver, username, password, True)
+                shall_reset = False
+
+            else:
+                do_check(driver, username, password, False)
+
+        except Exception as e:
+            shall_reset = True
+            print(e)
+
         sleep(PAGE_REFRESH_IN_SECONDS)
 
 
