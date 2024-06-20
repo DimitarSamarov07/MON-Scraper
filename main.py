@@ -12,7 +12,7 @@ from mail import do_alert_mail
 
 RUN_HEADLESS = True
 LOGIN_REFRESH_IN_MINUTES = 55
-PAGE_REFRESH_IN_SECONDS = 5
+PAGE_REFRESH_IN_SECONDS = 20
 
 # It is recommended that you use a .env file and let dotenv do the work.
 USERNAME = ""
