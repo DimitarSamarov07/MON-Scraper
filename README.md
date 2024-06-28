@@ -1,6 +1,6 @@
 # MON Scraper
 
-MON scraper is a script written in Python with the use of the Selenium library, developed with the sole purpose of obtaining the results from https://infopriem.mon.bg and 
+MON scraper is a script written in Python with the use of the Selenium library, developed with the sole purpose of obtaining the exam results from https://infopriem.mon.bg and 
 notifying you by email (current version relies on SMTP with Gmail). I did this because most of the time when these results
 come out, the website soon begins crashing. MON has no email notification of their own. This script makes sure that as soon as the results are out, you'll be one
 of the first to get them. ReCaptcha is not a problem as we initialize a log out only when the token expires(default reset time is set to 55 minutes).
