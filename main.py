@@ -2,7 +2,7 @@ import os
 from time import sleep, time
 
 from dotenv import load_dotenv
-from selenium import webdriver
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -14,7 +14,7 @@ RUN_HEADLESS = True
 LOGIN_REFRESH_IN_MINUTES = 55
 PAGE_REFRESH_IN_SECONDS = 20
 
-# It is recommended that you use a .env file and let dotenv do the work.
+# It's best to declare these in the .env file
 USERNAME = ""
 PASSWORD = ""
 
@@ -23,16 +23,16 @@ last_result = None
 
 
 def init_driver():
-    options = webdriver.ChromeOptions()
-    if RUN_HEADLESS:
-        options.add_argument('--headless')
+    options = uc.ChromeOptions()
 
-    driver = webdriver.Chrome(options)
+    # undetected_chromedriver handles headless mode best when passed as a keyword argument
+    # Make sure to also change the version_main to your browser's version.
+    driver = uc.Chrome(options=options, headless=RUN_HEADLESS, version_main=148)
 
     return driver
 
 
-def sign_in(driver: webdriver.Chrome, username, password):
+def sign_in(driver: uc.Chrome, username, password):
     driver.get("https://infopriem.mon.bg/login")
     driver.find_element(By.XPATH, xpath.USERNAME_INPUT).send_keys(username)
     driver.find_element(By.XPATH, xpath.PASSWORD_INPUT).send_keys(password)
@@ -45,11 +45,11 @@ def sign_in(driver: webdriver.Chrome, username, password):
     WebDriverWait(driver, 40).until(EC.invisibility_of_element_located(sign_in_btn))
 
 
-def log_out(driver: webdriver.Chrome):
+def log_out(driver: uc.Chrome):
     driver.get("https://infopriem.mon.bg/logout")
 
 
-def navigate_to_exams(driver: webdriver.Chrome):
+def navigate_to_exams(driver: uc.Chrome):
     driver.get("https://infopriem.mon.bg/student/marks")
     table = driver.find_element(By.XPATH, xpath.EXAMS_TABLE)
 
@@ -66,7 +66,7 @@ def navigate_to_exams(driver: webdriver.Chrome):
     return exams, table
 
 
-def do_check(driver: webdriver.Chrome, username, password, re_login):
+def do_check(driver: uc.Chrome, username, password, re_login):
     global start_time
     global last_result
 
@@ -85,7 +85,7 @@ def do_check(driver: webdriver.Chrome, username, password, re_login):
         last_result = result
 
 
-def scheduler(driver: webdriver.Chrome, username, password):
+def scheduler(driver: uc.Chrome, username, password):
     shall_reset = False
     while True:
         try:
@@ -105,7 +105,7 @@ def scheduler(driver: webdriver.Chrome, username, password):
         sleep(PAGE_REFRESH_IN_SECONDS)
 
 
-def execute_alert(driver: webdriver.Chrome, new_result, table_el):
+def execute_alert(driver: uc.Chrome, new_result, table_el):
     global last_result
     print("Alert fired!")
 
