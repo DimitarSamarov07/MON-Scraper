@@ -10,7 +10,10 @@ of the first to get them. ReCaptcha is not a problem as we initialize a log out 
 * Python 3.5+ (tested and developed on 3.12)
 * Google Chrome browser (make sure to set the correct version in the main.py file)
 * Pip 3
-* Linux / MacOS / Windows
+* Xvfb (_Linux-only_. Make sure to install the necessary package. For e.g., on Arch it's _xorg-server-xvfb_) 
+* Linux / macOS<sup>\*</sup> / Windows<sup>\*</sup>
+
+_\* Only tested on Linux, although it should work on Windows and macOS as well._
 
 
 ## Installation of packages
