@@ -10,7 +10,11 @@ from selenium.webdriver.support.wait import WebDriverWait
 import xpathlist as xpath
 from mail import do_alert_mail
 
+# This doesn't actually run the driver in a headless mode as it gets flagged.
+# Instead, it uses Xvfb to emulate a headless browser.
 RUN_HEADLESS = True
+
+
 LOGIN_REFRESH_IN_MINUTES = 55
 PAGE_REFRESH_IN_SECONDS = 20
 
@@ -20,14 +24,18 @@ PASSWORD = ""
 
 time_since_last_login = 0
 last_result = None
+display = None
 
 
 def init_driver():
     options = uc.ChromeOptions()
 
+    if RUN_HEADLESS:
+        options.add_argument("--ozone-platform=x11")
+
     # undetected_chromedriver handles headless mode best when passed as a keyword argument
     # Make sure to also change the version_main to your browser's version.
-    driver = uc.Chrome(options=options, headless=RUN_HEADLESS, version_main=148)
+    driver = uc.Chrome(options=options, version_main=148)
 
     return driver
 
@@ -123,6 +131,30 @@ def import_from_env():
     PASSWORD = os.getenv("PASSWORD_USER")
 
 
-import_from_env()
-driver_el = init_driver()
-scheduler(driver_el, USERNAME, PASSWORD)
+if __name__ == "__main__":
+    import_from_env()
+
+    # Dynamically check if we need to start the virtual display
+    if RUN_HEADLESS:
+        from pyvirtualdisplay import Display
+
+        print("Starting script in pseudo-headless mode (Xvfb)...")
+        display = Display(visible=False, size=(1920, 1080))
+        display.start()
+
+        # --- WAYLAND FIX ---
+        # Hide Wayland from Chrome so it is forced to use the invisible Xvfb monitor
+        if "WAYLAND_DISPLAY" in os.environ:
+            del os.environ["WAYLAND_DISPLAY"]
+            print("Wayland session detected and bypassed.")
+    else:
+        print("Starting script in visible UI mode...")
+
+    try:
+        driver_el = init_driver()
+        scheduler(driver_el, USERNAME, PASSWORD)
+    finally:
+        # If the virtual display was created, make sure it cleans up on exit
+        if display:
+            print("Stopping virtual display...")
+            display.stop()
