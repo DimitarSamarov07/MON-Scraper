@@ -8,6 +8,7 @@ of the first to get them. ReCaptcha is not a problem as we initialize a log out 
 
 ## Prerequisites
 * Python 3.5+ (tested and developed on 3.12)
+* Google Chrome browser (make sure to set the correct version in the main.py file)
 * Pip 3
 * Linux / MacOS / Windows
 
