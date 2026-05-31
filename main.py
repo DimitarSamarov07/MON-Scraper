@@ -1,4 +1,5 @@
 import os
+import sys
 from time import sleep, time
 
 from dotenv import load_dotenv
@@ -31,7 +32,14 @@ def init_driver():
     options = uc.ChromeOptions()
 
     if RUN_HEADLESS:
-        options.add_argument("--ozone-platform=x11")
+        # Handle Windows and Mac
+        if sys.platform in ["win32", "darwin"]:
+            # Set the window position to a far-off position(outside the screen)
+            options.add_argument("--window-position=-32000,-32000")
+
+        # Handle Linux
+        else:
+            options.add_argument("--ozone-platform=x11")
 
     # undetected_chromedriver handles headless mode best when passed as a keyword argument
     # Make sure to also change the version_main to your browser's version.
@@ -136,17 +144,19 @@ if __name__ == "__main__":
 
     # Dynamically check if we need to start the virtual display
     if RUN_HEADLESS:
-        from pyvirtualdisplay import Display
+        if sys.platform in ["win32", "darwin"]:
+            print(f"Starting script in pseudo-headless mode ({sys.platform} Off-Screen)...")
+        else: ###### Linux
+            from pyvirtualdisplay import Display
 
-        print("Starting script in pseudo-headless mode (Xvfb)...")
-        display = Display(visible=False, size=(1920, 1080))
-        display.start()
+            print("Starting script in pseudo-headless mode (Xvfb)...")
+            display = Display(visible=False, size=(1920, 1080))
+            display.start()
 
-        # --- WAYLAND FIX ---
-        # Hide Wayland from Chrome so it is forced to use the invisible Xvfb monitor
-        if "WAYLAND_DISPLAY" in os.environ:
-            del os.environ["WAYLAND_DISPLAY"]
-            print("Wayland session detected and bypassed.")
+            # Remove the Wayland Display variable to force Xvfb
+            if "WAYLAND_DISPLAY" in os.environ:
+                del os.environ["WAYLAND_DISPLAY"]
+                print("Wayland session detected and bypassed.")
     else:
         print("Starting script in visible UI mode...")
 
@@ -154,7 +164,7 @@ if __name__ == "__main__":
         driver_el = init_driver()
         scheduler(driver_el, USERNAME, PASSWORD)
     finally:
-        # If the virtual display was created, make sure it cleans up on exit
-        if display:
+        # If the virtual display was created, make sure it cleans up on exit(Linux-only)
+        if sys.platform not in ["win32", "darwin"] and display:
             print("Stopping virtual display...")
             display.stop()
