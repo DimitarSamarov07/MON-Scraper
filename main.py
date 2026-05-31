@@ -18,7 +18,7 @@ PAGE_REFRESH_IN_SECONDS = 20
 USERNAME = ""
 PASSWORD = ""
 
-start_time = 0
+time_since_last_login = 0
 last_result = None
 
 
@@ -67,14 +67,14 @@ def navigate_to_exams(driver: uc.Chrome):
 
 
 def do_check(driver: uc.Chrome, username, password, re_login):
-    global start_time
+    global time_since_last_login
     global last_result
 
-    if time() >= start_time + (LOGIN_REFRESH_IN_MINUTES * 60) or re_login:
+    if time() >= time_since_last_login + (LOGIN_REFRESH_IN_MINUTES * 60) or re_login:
         print("Re-login initiated")
         log_out(driver)
         sign_in(driver, username, password)
-        start_time = time()
+        time_since_last_login = time()
 
     result, table = navigate_to_exams(driver)
     print(result)
